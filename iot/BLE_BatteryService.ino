@@ -48,16 +48,17 @@ void setup() {
   InitBLE();
 }
 
-uint8_t level = 57;
-
 void loop () {
-  BatteryLevelCharacteristic.setValue(&level, 1);
-  BatteryLevelCharacteristic.notify();
-  delay(5000);
+  if (clientConnected) {
+     uint8_t level = 57;
+     BatteryLevelCharacteristic.setValue(&level, 1);
+     BatteryLevelCharacteristic.notify();
+     delay(5000);
 
-  level++;
-  Serial.println(int(level));
-
-  if (int(level)>=100)
-  level=100;
+     level++; 
+     if (int(level)>=100){
+      level=100;
+     }
+     Serial.println(int(level));
+  }
 }
