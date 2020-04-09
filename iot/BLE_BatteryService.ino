@@ -10,8 +10,6 @@ BLEDescriptor BatteryLevelDescriptor(BLEUUID((uint16_t)0x2901));
 
 bool clientConnected = false;
 
-#define DHTTYPE    DHT11     // DHT 11
-
 class MyServerCallbacks: public BLEServerCallbacks {
   void onConnect (BLEServer * pServer) {
     clientConnected = true;
