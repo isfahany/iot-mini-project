@@ -1,1 +1,1 @@
-sudo pip install pybluez[ble]
+sudo pip install "pybluez[ble]"
