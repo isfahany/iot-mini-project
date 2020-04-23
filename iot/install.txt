@@ -1,1 +1,3 @@
-sudo pip install "pybluez[ble]"
+sudo pip install "pybluez[ble]";
+sudo pip install thingspeak;
+sudo pip install paho-mqtt
