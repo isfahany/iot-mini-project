@@ -1,21 +1,11 @@
 import paho.mqtt.client as mqtt
-import time
-import thingspeak
-from ast import literal_eval
-
-MQTT_BROKER =
-MQTT_PORT =
-MQTT_TOPIC =
-THINGSPEAK_CHANNEL =
-THINGSPEAK_API = 
-UPDATE_INTERVAL = 
 
 client = mqtt.Client()
-client.connect(MQTT_BROKER, MQTT_PORT)
-client.loop_start()
+client.connect("mqtt.thingspeak.com",1883,60)
 
-while True:
-    thing = thingspeak.Channel(THINGSPEAK_CHANNEL, THINGSPEAK_API)
-    n = literal_eval(thing.get_field_last(field='1'))
-    client.publish(MQTT_TOPIC, n)
-    time.sleep(UPDATE_INTERVAL)
+channelId = "1046955"
+apiKey = "R2GFC1Q7A5Y999I0" #Write
+#apiKey = "3CIKRBES3MDG9W7J" #Read
+client.publish("channels/%s/publish/%s" % (channelId, apiKey),
+               "field1=10&field2=543")
+client.loop_forever(2)
