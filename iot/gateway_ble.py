@@ -1,29 +1,22 @@
-from bluetooth.ble import BeaconService
+#from gattlib import DiscoveryService
 
+#service = DiscoveryService("hci0")
+#devices = service.discover(2)
 
-class Beacon:
+#for address, name in devices.items():
+    #print("name: {}, address: {}".format(name, address))
 
-    def __init__(self, data, address):
-        self._uuid = data[0]
-        self._major = data[1]
-        self._minor = data[2]
-        self._power = data[3]
-        self._rssi = data[4]
-        self._address = address
+from gattlib import GATTRequester
 
-    def __str__(self):
-        ret = "Beacon: address:{ADDR} uuid:{UUID} major:{MAJOR} " \
-              "minor:{MINOR} txpower:{POWER} rssi:{RSSI}" \
-              .format(ADDR=self._address, UUID=self._uuid, MAJOR=self._major,
-                      MINOR=self._minor, POWER=self._power, RSSI=self._rssi)
-        return ret
+try:
+    req = GATTRequester("3C:71:BF:FD:08:96")
+    while True:
+        data = req.read_by_uuid("00002A37-0000-1000-8000-00805F9B34FB")[0]
+        #data = req.read_by_handle(0x180F)[0]
+        print("bytes received:", end=' ')
+        for b in data:
+            print(int(b), end=' ')
+        print()
 
-
-service = BeaconService()
-devices = service.scan(2)
-
-for address, data in list(devices.items()):
-    b = Beacon(data, address)
-    print(b)
-
-print("Done.")
+except KeyboardInterrupt:
+    exit(1)
