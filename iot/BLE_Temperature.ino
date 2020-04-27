@@ -4,15 +4,13 @@
 #include <BLE2902.h>
 #include <DHT.h>
 
-#define TemperatureService BLEUUID((uint16_t)0x181A) 
-BLECharacteristic HumidityCharacteristic(BLEUUID((uint16_t)0x2A6F), BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY); 
-BLECharacteristic TemperatureCharacteristic(BLEUUID((uint16_t)0x2A6E), BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
-BLEDescriptor TemperatureDescriptor(BLEUUID((uint16_t)0x2901));
-BLEDescriptor HumidityDescriptor(BLEUUID((uint16_t)0x2901));
+#define Env_Service_UUID        "0000181A-0000-1000-8000-00805F9B34FB"
+#define CHARACTERISTIC_UUID     "00002A1C-0000-1000-8000-00805F9B34FB"
+
+float temperature = 0.0;
+BLECharacteristic TemperatureCharacteristic(BLEUUID(CHARACTERISTIC_UUID), BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
 
 bool clientConnected = false;
-
-#define DHTTYPE    DHT11     // DHT 11
 
 class MyServerCallbacks: public BLEServerCallbacks {
   void onConnect (BLEServer * pServer) {
@@ -30,20 +28,13 @@ void InitBLE() {
   pServer->setCallbacks(new MyServerCallbacks());
 
   // Create the BLE Service
-  BLEService *pTemperature = pServer->createService(TemperatureService);
+  BLEService *pTemperature = pServer->createService(Env_Service_UUID);
 
-  pTemperature->addCharacteristic(&TemperatureCharacteristic);
-  pTemperature->addCharacteristic(&HumidityCharacteristic);
-  TemperatureDescriptor.setValue("Temperature -40-60°C");
-  HumidityDescriptor.setValue("Humidity 0 to 100%");
-  TemperatureCharacteristic.addDescriptor(&TemperatureDescriptor);
-  HumidityCharacteristic.addDescriptor(&HumidityDescriptor);
-  HumidityCharacteristic.addDescriptor(new BLE2902());
-  TemperatureCharacteristic.addDescriptor(new BLE2902());;
+  TemperatureCharacteristic.addDescriptor(new BLE2902());
 
-  pServer->getAdvertising()->addServiceUUID(TemperatureService);
+  pServer->getAdvertising()->addServiceUUID(Env_Service_UUID);
 
-  pBattery->start();
+  pTemperature->start();
   // Start advertising
   pServer->getAdvertising()->start();
 }
@@ -56,15 +47,13 @@ void setup() {
 
 void loop () {
   if (clientConnected) {
-     uint8_t level = 57;
-     BatteryLevelCharacteristic.setValue(&level, 1);
-     BatteryLevelCharacteristic.notify();
-     delay(5000);
-
-     level++; 
-     if (int(level)>=100){
-      level=100;
-     }
-     Serial.println(int(level));
+     uint8_t buf[6];
+     buf[0] = 0x06;
+     temperature = random(240, 270) / 10.0;
+     buf[1] = temperature;
+     TemperatureCharacteristic.setValue(buf, sizeof(buf));
+     TemperatureCharacteristic.notify();
+     Serial.println(temperature);
+     delay(50000);
   }
 }
