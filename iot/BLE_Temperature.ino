@@ -7,8 +7,8 @@
 #define TemperatureService BLEUUID((uint16_t)0x181A) 
 BLECharacteristic HumidityCharacteristic(BLEUUID((uint16_t)0x2A6F), BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY); 
 BLECharacteristic TemperatureCharacteristic(BLEUUID((uint16_t)0x2A6E), BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
-BLEDescriptor TemperatureDescriptor(BLEUUID((uint16_t)0x2901))
-BLEDescriptor HumidityDescriptor(BLEUUID((uint16_t)0x2901))
+BLEDescriptor TemperatureDescriptor(BLEUUID((uint16_t)0x2901));
+BLEDescriptor HumidityDescriptor(BLEUUID((uint16_t)0x2901));
 
 bool clientConnected = false;
 
