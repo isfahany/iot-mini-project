@@ -16,14 +16,14 @@ try:
         data = req.read_by_uuid("00002A37-0000-1000-8000-00805F9B34FB")[0]
         #data = req.read_by_handle(0x180F)[0]
         
-        print("bytes received:", end=' ')
-        
         value_byte = int(data[1])
+        
+        print("bytes received:", end=' ')
         print(value_byte, end=' ')
-        if(value_byte < 65):
+        if(value_byte < 100):
             send_to_thingspeak = 0
             print("0. Darah rendah")
-        elif(value_byte < 73):
+        elif(value_byte < 120):
             send_to_thingspeak = 1
             print("1. Normal")
         else:
@@ -32,6 +32,8 @@ try:
         client.publish("channels/%s/publish/%s" % (channelId, apiKey),
                "field1="+ str(send_to_thingspeak))
         client.loop(2)
+        sleep(20)
+
 
 except KeyboardInterrupt:
     exit(1)

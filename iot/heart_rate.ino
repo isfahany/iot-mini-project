@@ -89,12 +89,12 @@ void loop() {
     if (deviceConnected) {
         uint8_t buf[6];
         buf[0] = 0x08;
-        value = random(60, 100);
+        value = random(80, 140);
         Serial.println(value);
         buf[1] = value;
         pCharacteristic->setValue(buf, sizeof(buf));
         pCharacteristic->notify();
-        delay(5000); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
+        delay(20000); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
     }
     // disconnecting
     if (!deviceConnected && oldDeviceConnected) {
