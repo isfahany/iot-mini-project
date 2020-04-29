@@ -4,10 +4,12 @@
 #include <BLE2902.h>
 #include <DHT.h>
 
-#define BatteryService BLEUUID((uint16_t)0x180F) 
-BLECharacteristic BatteryLevelCharacteristic(BLEUUID((uint16_t)0x2A19), BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
-BLEDescriptor BatteryLevelDescriptor(BLEUUID((uint16_t)0x2901));
 
+#define Service_UUID        "0000180F-0000-1000-8000-00805F9B34FB"
+#define CHARACTERISTIC_UUID "00002A19-0000-1000-8000-00805F9B34FB"
+
+BLECharacteristic BatteryLevelCharacteristic(BLEUUID(CHARACTERISTIC_UUID), BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
+                    
 bool clientConnected = false;
 
 class MyServerCallbacks: public BLEServerCallbacks {
@@ -20,20 +22,18 @@ class MyServerCallbacks: public BLEServerCallbacks {
 };
 
 void InitBLE() {
+  Serial.begin(115200);
   BLEDevice::init("BLE Battery");
   // Create the BLE Server
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
 
   // Create the BLE Service
-  BLEService *pBattery = pServer->createService(BatteryService);
-
-  pBattery->addCharacteristic(&BatteryLevelCharacteristic);
-  BatteryLevelDescriptor.setValue("Percentage 0 - 100");
-  BatteryLevelCharacteristic.addDescriptor(&BatteryLevelDescriptor);
+  BLEService *pBattery = pServer->createService(Service_UUID);
+                    
   BatteryLevelCharacteristic.addDescriptor(new BLE2902());
 
-  pServer->getAdvertising()->addServiceUUID(BatteryService);
+  pServer->getAdvertising()->addServiceUUID(Service_UUID);
 
   pBattery->start();
   // Start advertising
