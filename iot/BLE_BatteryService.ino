@@ -2,13 +2,12 @@
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <BLE2902.h>
-#include <DHT.h>
 
+BLEServer* pServer = NULL;
+BLECharacteristic* pCharacteristic = NULL;
 
 #define Service_UUID        "0000180F-0000-1000-8000-00805F9B34FB"
 #define CHARACTERISTIC_UUID "00002A19-0000-1000-8000-00805F9B34FB"
-
-BLECharacteristic BatteryLevelCharacteristic(BLEUUID(CHARACTERISTIC_UUID), BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
                     
 bool clientConnected = false;
 
@@ -25,19 +24,27 @@ void InitBLE() {
   Serial.begin(115200);
   BLEDevice::init("BLE Battery");
   // Create the BLE Server
-  BLEServer *pServer = BLEDevice::createServer();
+  pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
 
   // Create the BLE Service
   BLEService *pBattery = pServer->createService(Service_UUID);
-                    
-  BatteryLevelCharacteristic.addDescriptor(new BLE2902());
 
-  pServer->getAdvertising()->addServiceUUID(Service_UUID);
+  pCharacteristic = pBattery->createCharacteristic(
+                      CHARACTERISTIC_UUID,
+                      BLECharacteristic::PROPERTY_NOTIFY
+                    );
+                    
+  pCharacteristic->addDescriptor(new BLE2902());
 
   pBattery->start();
   // Start advertising
-  pServer->getAdvertising()->start();
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(Service_UUID);
+  pAdvertising->setScanResponse(false);
+  pAdvertising->setMinPreferred(0x0);
+  BLEDevice::startAdvertising();
+  Serial.println("Waiting a client connection to notify...");
 }
 
 void setup() {
@@ -46,11 +53,12 @@ void setup() {
   InitBLE();
 }
 
+uint8_t level = 57;
+
 void loop () {
   if (clientConnected) {
-     uint8_t level = 57;
-     BatteryLevelCharacteristic.setValue(&level, 1);
-     BatteryLevelCharacteristic.notify();
+     pCharacteristic->setValue(&level, 1);
+     pCharacteristic->notify();
      delay(5000);
 
      level++; 
