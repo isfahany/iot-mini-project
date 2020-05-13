@@ -2,7 +2,9 @@
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <BLE2902.h>
-#include <DHT.h>
+
+BLEServer* pServer = NULL;
+BLECharacteristic* pCharacteristic = NULL;
 
 #define Env_Service_UUID        "0000181A-0000-1000-8000-00805F9B34FB"
 #define CHARACTERISTIC_UUID     "00002A1C-0000-1000-8000-00805F9B34FB"
@@ -24,7 +26,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
 void InitBLE() {
   BLEDevice::init("BLE Temperature");
   // Create the BLE Server
-  BLEServer *pServer = BLEDevice::createServer();
+  pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
 
   // Create the BLE Service
@@ -32,11 +34,17 @@ void InitBLE() {
 
   TemperatureCharacteristic.addDescriptor(new BLE2902());
 
+  pCharacteristic = pTemperature->createCharacteristic(
+                      CHARACTERISTIC_UUID,
+                      BLECharacteristic::PROPERTY_NOTIFY
+                    );
+                    
   pServer->getAdvertising()->addServiceUUID(Env_Service_UUID);
 
   pTemperature->start();
   // Start advertising
   pServer->getAdvertising()->start();
+  Serial.println("Waiting a client connection to notify...");
 }
 
 void setup() {
@@ -51,8 +59,8 @@ void loop () {
      buf[0] = 0x06;
      temperature = random(240, 270) / 10.0;
      buf[1] = temperature;
-     TemperatureCharacteristic.setValue(buf, sizeof(buf));
-     TemperatureCharacteristic.notify();
+     pCharacteristic->setValue(buf, sizeof(buf));
+     pCharacteristic->notify();
      Serial.println(temperature);
      delay(50000);
   }
